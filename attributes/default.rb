@@ -48,8 +48,9 @@ default[:mongodb][:ulimit][:memory_size] = "unlimited"
 default[:mongodb][:ulimit][:processes] = 32000
 
 default[:mongodb][:init_dir] = "/etc/init.d"
-
 default[:mongodb][:init_script_template] = "mongodb.init.erb"
+default[:mongodb][:service_name] = false
+
 
 case node['platform_family']
 when "freebsd"
@@ -59,11 +60,15 @@ when "freebsd"
   default[:mongodb][:package_name] = "mongodb"
 
 when "rhel","fedora"
-  default[:mongodb][:defaults_dir] = "/etc/sysconfig"
+  default[:mongodb][:service_name] = 'mongod'
+  default[:mongodb][:defaults_dir] = false
+  default[:mongodb][:init_dir] = false
   default[:mongodb][:package_name] = "mongo-10gen-server"
   default[:mongodb][:user] = "mongod"
   default[:mongodb][:group] = "mongod"
   default[:mongodb][:init_script_template] = "redhat-mongodb.init.erb"
+  default[:mongodb][:dbpath] = "/var/lib/mongo"
+  default[:mongodb][:logpath] = "/var/log/mongo"
 
 else
   default[:mongodb][:defaults_dir] = "/etc/default"

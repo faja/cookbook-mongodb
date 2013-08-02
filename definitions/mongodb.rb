@@ -26,7 +26,7 @@ define :mongodb_instance, :mongodb_type => "mongod" , :action => [:enable, :star
     
   include_recipe "mongodb::default"
   
-  name = params[:name]
+  name = node['mongodb']['service_name'] ? node['mongodb']['service_name'] : params[:name]
   type = params[:mongodb_type]
   service_action = params[:action]
   service_notifies = params[:notifies]
@@ -84,30 +84,32 @@ define :mongodb_instance, :mongodb_type => "mongod" , :action => [:enable, :star
   end
   
   # default file
-  template "#{node['mongodb']['defaults_dir']}/#{name}" do
-    action :create
-    cookbook node['mongodb']['template_cookbook']
-    source "mongodb.default.erb"
-    group node['mongodb']['root_group']
-    owner "root"
-    mode "0644"
-    variables(
-      "daemon_path" => daemon,
-      "name" => name,
-      "config" => configfile,
-      "configdb" => configserver,
-      "bind_ip" => bind_ip,
-      "port" => port,
-      "logpath" => logfile,
-      "dbpath" => dbpath,
-      "replicaset_name" => replicaset_name,
-      "configsrv" => false, #type == "configserver", this might change the port
-      "shardsrv" => false,  #type == "shard", dito.
-      "nojournal" => nojournal,
-      "enable_rest" => params[:enable_rest],
-      "smallfiles" => params[:smallfiles]
-    )
-    notifies :restart, "service[#{name}]"
+  if node['mongodb']['defaults_dir']
+    template "#{node['mongodb']['defaults_dir']}/#{name}" do
+      action :create
+      cookbook node['mongodb']['template_cookbook']
+      source "mongodb.default.erb"
+      group node['mongodb']['root_group']
+      owner "root"
+      mode "0644"
+      variables(
+        "daemon_path" => daemon,
+        "name" => name,
+        "config" => configfile,
+        "configdb" => configserver,
+        "bind_ip" => bind_ip,
+        "port" => port,
+        "logpath" => logfile,
+        "dbpath" => dbpath,
+        "replicaset_name" => replicaset_name,
+        "configsrv" => false, #type == "configserver", this might change the port
+        "shardsrv" => false,  #type == "shard", dito.
+        "nojournal" => nojournal,
+        "enable_rest" => params[:enable_rest],
+        "smallfiles" => params[:smallfiles]
+      )
+      notifies :restart, "service[#{name}]"
+    end
   end
   
   # log dir [make sure it exists]
@@ -131,15 +133,17 @@ define :mongodb_instance, :mongodb_type => "mongod" , :action => [:enable, :star
   end
   
   # init script
-  template "#{node['mongodb']['init_dir']}/#{name}" do
-    action :create
-    cookbook node['mongodb']['template_cookbook']
-    source node[:mongodb][:init_script_template]
-    group node['mongodb']['root_group']
-    owner "root"
-    mode "0755"
-    variables :provides => name
-    notifies :restart, "service[#{name}]"
+  if node['mongodb']['init_dir']
+    template "#{node['mongodb']['init_dir']}/#{name}" do
+      action :create
+      cookbook node['mongodb']['template_cookbook']
+      source node[:mongodb][:init_script_template]
+      group node['mongodb']['root_group']
+      owner "root"
+      mode "0755"
+      variables :provides => name
+      notifies :restart, "service[#{name}]"
+    end
   end
   
   # service
