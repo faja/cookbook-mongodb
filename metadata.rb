@@ -1,6 +1,6 @@
 name              "mongodb"
-maintainer        "edelight GmbH"
-maintainer_email  "markus.korn@edelight.de"
+maintainer        "Marcin Cabaj"
+maintainer_email  "mcabaj@gmail.com"
 license           "Apache 2.0"
 description       "Installs and configures mongodb"
 version           "0.13.2"
@@ -12,7 +12,7 @@ recipe "mongodb::configserver", "Installs and configures a configserver for mong
 recipe "mongodb::shard", "Installs and configures a single shard"
 recipe "mongodb::replicaset", "Installs and configures a mongodb replicaset"
 
-depends "apt", ">= 1.8.2"
+depends "apt"
 depends "yum"
 
 %w{ ubuntu debian freebsd centos redhat fedora amazon scientific}.each do |os|
